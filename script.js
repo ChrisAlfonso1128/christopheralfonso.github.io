@@ -1,16 +1,20 @@
 const board = document.getElementById("board");
 const statusText = document.getElementById("status");
-const restartButton = document.getElementById("restart");
-const pvpButton = document.getElementById("pvp");
-const aiButton = document.getElementById("ai");
 const scoreX = document.getElementById("scoreX");
 const scoreO = document.getElementById("scoreO");
 
+const pvpButton = document.getElementById("pvp");
+const aiButton = document.getElementById("ai");
+const backButton = document.getElementById("back");
+
+const modeScreen = document.getElementById("modeScreen");
+const gameScreen = document.getElementById("gameScreen");
+
 let currentPlayer = "X";
-let gameActive = false;
-let cells = [];
 let boardState = Array(9).fill("");
+let cells = [];
 let vsAI = false;
+let gameActive = false;
 let scores = { X: 0, O: 0 };
 
 const winConditions = [
@@ -19,10 +23,20 @@ const winConditions = [
     [0,4,8],[2,4,6]
 ];
 
-function createBoard() {
+function startGame(modeAI) {
+    vsAI = modeAI;
+    modeScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+    resetBoard();
+}
+
+function resetBoard() {
     board.innerHTML = "";
-    cells = [];
     boardState = Array(9).fill("");
+    cells = [];
+    currentPlayer = "X";
+    gameActive = true;
+    statusText.textContent = "Player X's turn";
 
     for (let i = 0; i < 9; i++) {
         const cell = document.createElement("div");
@@ -54,11 +68,11 @@ function makeMove(index, player) {
 }
 
 function aiMove() {
-    let emptyIndexes = boardState
-        .map((val, idx) => val === "" ? idx : null)
-        .filter(val => val !== null);
+    let empty = boardState
+        .map((v,i) => v === "" ? i : null)
+        .filter(v => v !== null);
 
-    let randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+    let randomIndex = empty[Math.floor(Math.random() * empty.length)];
     makeMove(randomIndex, "O");
 
     if (checkGameEnd()) return;
@@ -68,47 +82,37 @@ function aiMove() {
 }
 
 function checkGameEnd() {
-    for (let condition of winConditions) {
-        const [a, b, c] = condition;
+    for (let [a,b,c] of winConditions) {
         if (boardState[a] &&
             boardState[a] === boardState[b] &&
             boardState[a] === boardState[c]) {
 
-            statusText.textContent = `Player ${boardState[a]} wins!`;
+            gameActive = false;
             scores[boardState[a]]++;
             scoreX.textContent = scores.X;
             scoreO.textContent = scores.O;
-            gameActive = false;
+
+            statusText.textContent = `Player ${boardState[a]} wins!`;
+
+            setTimeout(resetBoard, 2000);
             return true;
         }
     }
 
     if (!boardState.includes("")) {
-        statusText.textContent = "It's a draw!";
         gameActive = false;
+        statusText.textContent = "Draw!";
+        setTimeout(resetBoard, 2000);
         return true;
     }
 
     return false;
 }
 
-function restartGame() {
-    currentPlayer = "X";
-    gameActive = true;
-    statusText.textContent = `Player ${currentPlayer}'s turn`;
-    createBoard();
-}
+pvpButton.addEventListener("click", () => startGame(false));
+aiButton.addEventListener("click", () => startGame(true));
 
-pvpButton.addEventListener("click", () => {
-    vsAI = false;
-    restartGame();
+backButton.addEventListener("click", () => {
+    gameScreen.classList.add("hidden");
+    modeScreen.classList.remove("hidden");
 });
-
-aiButton.addEventListener("click", () => {
-    vsAI = true;
-    restartGame();
-});
-
-restartButton.addEventListener("click", restartGame);
-
-createBoard();
