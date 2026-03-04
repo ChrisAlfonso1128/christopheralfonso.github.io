@@ -1,68 +1,114 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+const restartButton = document.getElementById("restart");
+const pvpButton = document.getElementById("pvp");
+const aiButton = document.getElementById("ai");
+const scoreX = document.getElementById("scoreX");
+const scoreO = document.getElementById("scoreO");
+
+let currentPlayer = "X";
+let gameActive = false;
+let cells = [];
+let boardState = Array(9).fill("");
+let vsAI = false;
+let scores = { X: 0, O: 0 };
+
+const winConditions = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function createBoard() {
+    board.innerHTML = "";
+    cells = [];
+    boardState = Array(9).fill("");
+
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.addEventListener("click", () => handleClick(i));
+        board.appendChild(cell);
+        cells.push(cell);
+    }
 }
 
-.container {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+function handleClick(index) {
+    if (!gameActive || boardState[index] !== "") return;
+
+    makeMove(index, currentPlayer);
+
+    if (checkGameEnd()) return;
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusText.textContent = `Player ${currentPlayer}'s turn`;
+
+    if (vsAI && currentPlayer === "O") {
+        setTimeout(aiMove, 500);
+    }
 }
 
-.board {
-    display: grid;
-    grid-template-columns: repeat(3, 90px);
-    gap: 10px;
-    justify-content: center;
-    margin: 20px 0;
+function makeMove(index, player) {
+    boardState[index] = player;
+    cells[index].textContent = player;
 }
 
-.cell {
-    width: 90px;
-    height: 90px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: 0.2s ease;
+function aiMove() {
+    let emptyIndexes = boardState
+        .map((val, idx) => val === "" ? idx : null)
+        .filter(val => val !== null);
+
+    let randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+    makeMove(randomIndex, "O");
+
+    if (checkGameEnd()) return;
+
+    currentPlayer = "X";
+    statusText.textContent = "Player X's turn";
 }
 
-.cell:hover {
-    transform: scale(1.05);
-    background: rgba(255,255,255,0.2);
+function checkGameEnd() {
+    for (let condition of winConditions) {
+        const [a, b, c] = condition;
+        if (boardState[a] &&
+            boardState[a] === boardState[b] &&
+            boardState[a] === boardState[c]) {
+
+            statusText.textContent = `Player ${boardState[a]} wins!`;
+            scores[boardState[a]]++;
+            scoreX.textContent = scores.X;
+            scoreO.textContent = scores.O;
+            gameActive = false;
+            return true;
+        }
+    }
+
+    if (!boardState.includes("")) {
+        statusText.textContent = "It's a draw!";
+        gameActive = false;
+        return true;
+    }
+
+    return false;
 }
 
-button {
-    padding: 8px 15px;
-    margin: 5px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: #00c6ff;
-    color: black;
-    font-weight: bold;
-    transition: 0.2s;
+function restartGame() {
+    currentPlayer = "X";
+    gameActive = true;
+    statusText.textContent = `Player ${currentPlayer}'s turn`;
+    createBoard();
 }
 
-button:hover {
-    transform: scale(1.05);
-}
+pvpButton.addEventListener("click", () => {
+    vsAI = false;
+    restartGame();
+});
 
-.scoreboard {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-    font-size: 1.2rem;
-}
+aiButton.addEventListener("click", () => {
+    vsAI = true;
+    restartGame();
+});
+
+restartButton.addEventListener("click", restartGame);
+
+createBoard();
