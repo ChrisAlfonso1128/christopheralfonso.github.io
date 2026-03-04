@@ -6,14 +6,15 @@ const scoreO = document.getElementById("scoreO");
 const pvpButton = document.getElementById("pvp");
 const aiButton = document.getElementById("ai");
 const backButton = document.getElementById("back");
+const difficultyBox = document.getElementById("difficultyBox");
+const difficultyButtons = document.querySelectorAll(".difficulty");
 
 const modeScreen = document.getElementById("modeScreen");
 const gameScreen = document.getElementById("gameScreen");
 
-let currentPlayer;
-let boardState;
-let cells;
+let boardState, cells, currentPlayer;
 let vsAI = false;
+let difficulty = "hard";
 let gameActive = false;
 let scores = { X: 0, O: 0 };
 let restartTimeout = null;
@@ -27,12 +28,34 @@ const winConditions = [
     [0,4,8],[2,4,6]
 ];
 
-function startGame(isAI) {
-    vsAI = isAI;
+/* ===== SCREEN FLOW ===== */
+
+pvpButton.onclick = () => startGame(false);
+aiButton.onclick = () => difficultyBox.classList.remove("hidden");
+
+difficultyButtons.forEach(btn => {
+    btn.onclick = () => {
+        difficulty = btn.dataset.level;
+        startGame(true);
+    };
+});
+
+backButton.onclick = () => {
+    clearTimeout(restartTimeout);
+    gameActive = false;
+    gameScreen.classList.add("hidden");
+    modeScreen.classList.remove("hidden");
+    difficultyBox.classList.add("hidden");
+};
+
+function startGame(aiMode) {
+    vsAI = aiMode;
     modeScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
     initializeBoard();
 }
+
+/* ===== GAME LOGIC ===== */
 
 function initializeBoard() {
     board.innerHTML = "";
@@ -40,13 +63,12 @@ function initializeBoard() {
     cells = [];
     currentPlayer = HUMAN;
     gameActive = true;
-
     statusText.textContent = "Player X's turn";
 
     for (let i = 0; i < 9; i++) {
         const cell = document.createElement("div");
         cell.classList.add("cell");
-        cell.addEventListener("click", () => handleClick(i));
+        cell.onclick = () => handleClick(i);
         board.appendChild(cell);
         cells.push(cell);
     }
@@ -61,11 +83,7 @@ function handleClick(index) {
 
     if (vsAI) {
         statusText.textContent = "Computer thinking...";
-        setTimeout(() => {
-            let bestMove = getBestMove();
-            makeMove(bestMove, AI);
-            checkGameEnd();
-        }, 300);
+        setTimeout(aiMove, 400);
     } else {
         switchPlayer();
     }
@@ -81,44 +99,79 @@ function switchPlayer() {
     statusText.textContent = `Player ${currentPlayer}'s turn`;
 }
 
+/* ===== AI LOGIC ===== */
+
+function aiMove() {
+    if (!gameActive) return;
+
+    let move;
+
+    if (difficulty === "easy") {
+        move = getRandomMove();
+    } 
+    else if (difficulty === "medium") {
+        move = Math.random() < 0.5 ? getRandomMove() : getBestMove();
+    } 
+    else {
+        move = getBestMove();
+    }
+
+    makeMove(move, AI);
+    cells[move].classList.add("ai-move");
+
+    checkGameEnd();
+}
+
+function getRandomMove() {
+    let empty = boardState
+        .map((v,i) => v === "" ? i : null)
+        .filter(v => v !== null);
+
+    return empty[Math.floor(Math.random() * empty.length)];
+}
+
+/* ===== WIN CHECK ===== */
+
 function checkWinner(state) {
-    for (let [a,b,c] of winConditions) {
+    for (let condition of winConditions) {
+        const [a,b,c] = condition;
         if (state[a] && state[a] === state[b] && state[a] === state[c]) {
-            return state[a];
+            return { winner: state[a], combo: condition };
         }
     }
-    if (!state.includes("")) return "draw";
+    if (!state.includes("")) return { winner: "draw" };
     return null;
 }
 
 function checkGameEnd() {
     let result = checkWinner(boardState);
+    if (!result) {
+        if (!vsAI) switchPlayer();
+        return false;
+    }
 
-    if (result === HUMAN || result === AI) {
-        gameActive = false;
-        scores[result]++;
+    gameActive = false;
+
+    if (result.winner !== "draw") {
+        scores[result.winner]++;
         updateScores();
-        statusText.textContent = result === HUMAN ? "You win!" : "Computer wins!";
-        scheduleRestart();
-        return true;
-    }
-
-    if (result === "draw") {
-        gameActive = false;
+        statusText.textContent = result.winner === HUMAN ? "You win!" : "Computer wins!";
+        highlightWin(result.combo);
+    } else {
         statusText.textContent = "Draw!";
-        scheduleRestart();
-        return true;
     }
 
-    if (!vsAI) switchPlayer();
-    return false;
+    scheduleRestart();
+    return true;
+}
+
+function highlightWin(combo) {
+    combo.forEach(i => cells[i].classList.add("winner"));
 }
 
 function scheduleRestart() {
     clearTimeout(restartTimeout);
-    restartTimeout = setTimeout(() => {
-        initializeBoard();
-    }, 1500);
+    restartTimeout = setTimeout(initializeBoard, 1800);
 }
 
 function updateScores() {
@@ -126,9 +179,7 @@ function updateScores() {
     scoreO.textContent = scores.O;
 }
 
-/* ========================= */
-/* ===== MINIMAX AI ======== */
-/* ========================= */
+/* ===== ALPHA-BETA MINIMAX ===== */
 
 function getBestMove() {
     let bestScore = -Infinity;
@@ -137,7 +188,7 @@ function getBestMove() {
     for (let i = 0; i < 9; i++) {
         if (boardState[i] === "") {
             boardState[i] = AI;
-            let score = minimax(boardState, 0, false);
+            let score = minimax(boardState, 0, false, -Infinity, Infinity);
             boardState[i] = "";
             if (score > bestScore) {
                 bestScore = score;
@@ -148,46 +199,39 @@ function getBestMove() {
     return move;
 }
 
-function minimax(state, depth, isMaximizing) {
+function minimax(state, depth, isMax, alpha, beta) {
     let result = checkWinner(state);
-
-    if (result !== null) {
-        if (result === AI) return 10 - depth;
-        if (result === HUMAN) return depth - 10;
-        if (result === "draw") return 0;
+    if (result) {
+        if (result.winner === AI) return 10 - depth;
+        if (result.winner === HUMAN) return depth - 10;
+        return 0;
     }
 
-    if (isMaximizing) {
-        let bestScore = -Infinity;
+    if (isMax) {
+        let maxEval = -Infinity;
         for (let i = 0; i < 9; i++) {
             if (state[i] === "") {
                 state[i] = AI;
-                let score = minimax(state, depth + 1, false);
+                let evalScore = minimax(state, depth+1, false, alpha, beta);
                 state[i] = "";
-                bestScore = Math.max(score, bestScore);
+                maxEval = Math.max(maxEval, evalScore);
+                alpha = Math.max(alpha, evalScore);
+                if (beta <= alpha) break;
             }
         }
-        return bestScore;
+        return maxEval;
     } else {
-        let bestScore = Infinity;
+        let minEval = Infinity;
         for (let i = 0; i < 9; i++) {
             if (state[i] === "") {
                 state[i] = HUMAN;
-                let score = minimax(state, depth + 1, true);
+                let evalScore = minimax(state, depth+1, true, alpha, beta);
                 state[i] = "";
-                bestScore = Math.min(score, bestScore);
+                minEval = Math.min(minEval, evalScore);
+                beta = Math.min(beta, evalScore);
+                if (beta <= alpha) break;
             }
         }
-        return bestScore;
+        return minEval;
     }
 }
-
-pvpButton.addEventListener("click", () => startGame(false));
-aiButton.addEventListener("click", () => startGame(true));
-
-backButton.addEventListener("click", () => {
-    clearTimeout(restartTimeout);
-    gameActive = false;
-    gameScreen.classList.add("hidden");
-    modeScreen.classList.remove("hidden");
-});
