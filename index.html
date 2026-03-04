@@ -7,13 +7,19 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>Tic Tac Toe</h1>
+<div class="container">
 
-        <div class="mode-select">
-            <button id="pvp">Player vs Player</button>
-            <button id="ai">Play vs Computer</button>
-        </div>
+    <!-- Mode Screen -->
+    <div id="modeScreen">
+        <h1>Tic Tac Toe</h1>
+        <p>Select Game Mode</p>
+        <button id="pvp">Player vs Player</button>
+        <button id="ai">Play vs Computer</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="hidden">
+        <h1>Tic Tac Toe</h1>
 
         <div class="scoreboard">
             <span>X: <span id="scoreX">0</span></span>
@@ -22,10 +28,12 @@
 
         <div class="board" id="board"></div>
 
-        <div id="status">Choose a mode to start</div>
-        <button id="restart">Restart Game</button>
+        <div id="status"></div>
+        <button id="back">Change Mode</button>
     </div>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
