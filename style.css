@@ -1,73 +1,137 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+const scoreX = document.getElementById("scoreX");
+const scoreO = document.getElementById("scoreO");
+
+const pvpButton = document.getElementById("pvp");
+const aiButton = document.getElementById("ai");
+const backButton = document.getElementById("back");
+
+const modeScreen = document.getElementById("modeScreen");
+const gameScreen = document.getElementById("gameScreen");
+
+let currentPlayer;
+let boardState;
+let cells;
+let vsAI = false;
+let gameActive = false;
+let scores = { X: 0, O: 0 };
+let restartTimeout = null;
+
+const winConditions = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function startGame(isAI) {
+    vsAI = isAI;
+    modeScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+    initializeBoard();
 }
 
-.container {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 0 40px rgba(0,0,0,0.6);
-    width: 320px;
-    transition: all 0.3s ease;
+function initializeBoard() {
+    board.innerHTML = "";
+    boardState = Array(9).fill("");
+    cells = [];
+    currentPlayer = "X";
+    gameActive = true;
+
+    statusText.textContent = "Player X's turn";
+
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.addEventListener("click", () => handleClick(i));
+        board.appendChild(cell);
+        cells.push(cell);
+    }
 }
 
-.hidden {
-    display: none;
+function handleClick(index) {
+    if (!gameActive || boardState[index] !== "") return;
+
+    makeMove(index, currentPlayer);
+
+    if (checkGameEnd()) return;
+
+    switchPlayer();
+
+    if (vsAI && currentPlayer === "O") {
+        setTimeout(aiMove, 400);
+    }
 }
 
-.board {
-    display: grid;
-    grid-template-columns: repeat(3, 90px);
-    gap: 10px;
-    justify-content: center;
-    margin: 20px 0;
+function makeMove(index, player) {
+    boardState[index] = player;
+    cells[index].textContent = player;
 }
 
-.cell {
-    width: 90px;
-    height: 90px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: 0.2s ease;
+function switchPlayer() {
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusText.textContent = `Player ${currentPlayer}'s turn`;
 }
 
-.cell:hover {
-    transform: scale(1.05);
-    background: rgba(255,255,255,0.2);
+function aiMove() {
+    if (!gameActive) return;
+
+    let empty = boardState
+        .map((v,i) => v === "" ? i : null)
+        .filter(v => v !== null);
+
+    let randomIndex = empty[Math.floor(Math.random() * empty.length)];
+    makeMove(randomIndex, "O");
+
+    if (checkGameEnd()) return;
+
+    switchPlayer();
 }
 
-button {
-    padding: 8px 15px;
-    margin: 8px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: #00c6ff;
-    color: black;
-    font-weight: bold;
-    transition: 0.2s;
+function checkGameEnd() {
+    for (let [a,b,c] of winConditions) {
+        if (boardState[a] &&
+            boardState[a] === boardState[b] &&
+            boardState[a] === boardState[c]) {
+
+            gameActive = false;
+            scores[boardState[a]]++;
+            updateScores();
+            statusText.textContent = `Player ${boardState[a]} wins!`;
+
+            scheduleRestart();
+            return true;
+        }
+    }
+
+    if (!boardState.includes("")) {
+        gameActive = false;
+        statusText.textContent = "Draw!";
+        scheduleRestart();
+        return true;
+    }
+
+    return false;
 }
 
-button:hover {
-    transform: scale(1.05);
+function scheduleRestart() {
+    clearTimeout(restartTimeout);
+    restartTimeout = setTimeout(() => {
+        initializeBoard();
+    }, 1500);
 }
 
-.scoreboard {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+function updateScores() {
+    scoreX.textContent = scores.X;
+    scoreO.textContent = scores.O;
 }
+
+pvpButton.addEventListener("click", () => startGame(false));
+aiButton.addEventListener("click", () => startGame(true));
+
+backButton.addEventListener("click", () => {
+    clearTimeout(restartTimeout);
+    gameActive = false;
+    gameScreen.classList.add("hidden");
+    modeScreen.classList.remove("hidden");
+});
