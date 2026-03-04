@@ -9,13 +9,23 @@
 
 <div class="container">
 
+    <!-- Mode Screen -->
     <div id="modeScreen">
         <h1>Tic Tac Toe</h1>
+
         <p>Select Game Mode</p>
         <button id="pvp">Player vs Player</button>
         <button id="ai">Play vs Computer</button>
+
+        <div id="difficultyBox" class="hidden">
+            <p>Select Difficulty</p>
+            <button class="difficulty" data-level="easy">Easy</button>
+            <button class="difficulty" data-level="medium">Medium</button>
+            <button class="difficulty" data-level="hard">Unbeatable</button>
+        </div>
     </div>
 
+    <!-- Game Screen -->
     <div id="gameScreen" class="hidden">
         <div class="scoreboard">
             <span>X: <span id="scoreX">0</span></span>
@@ -23,8 +33,8 @@
         </div>
 
         <div class="board" id="board"></div>
-
         <div id="status"></div>
+
         <button id="back">Change Mode</button>
     </div>
 
