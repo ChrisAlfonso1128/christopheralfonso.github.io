@@ -2,17 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tic Tac Toe</title>
+    <title>Christopher's Tic Tac Toe</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Tic Tac Toe</h1>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
 
-    <div class="board" id="board"></div>
+        <div class="mode-select">
+            <button id="pvp">Player vs Player</button>
+            <button id="ai">Play vs Computer</button>
+        </div>
 
-    <div id="status">Player X's turn</div>
-    <button id="restart">Restart</button>
+        <div class="scoreboard">
+            <span>X: <span id="scoreX">0</span></span>
+            <span>O: <span id="scoreO">0</span></span>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div id="status">Choose a mode to start</div>
+        <button id="restart">Restart Game</button>
+    </div>
 
     <script src="script.js"></script>
 </body>
