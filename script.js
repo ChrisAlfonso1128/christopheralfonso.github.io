@@ -1,71 +1,68 @@
-const board = document.getElementById("board");
-const statusText = document.getElementById("status");
-const restartButton = document.getElementById("restart");
-
-let currentPlayer = "X";
-let gameActive = true;
-let cells = [];
-
-const winConditions = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
-];
-
-function createBoard() {
-    board.innerHTML = "";
-    cells = [];
-
-    for (let i = 0; i < 9; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.addEventListener("click", () => handleClick(i));
-        board.appendChild(cell);
-        cells.push(cell);
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-function handleClick(index) {
-    if (!gameActive || cells[index].textContent !== "") return;
-
-    cells[index].textContent = currentPlayer;
-
-    if (checkWin()) {
-        statusText.textContent = `Player ${currentPlayer} wins!`;
-        gameActive = false;
-        return;
-    }
-
-    if (cells.every(cell => cell.textContent !== "")) {
-        statusText.textContent = "It's a draw!";
-        gameActive = false;
-        return;
-    }
-
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-    statusText.textContent = `Player ${currentPlayer}'s turn`;
+.container {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
 }
 
-function checkWin() {
-    return winConditions.some(condition =>
-        condition.every(index =>
-            cells[index].textContent === currentPlayer
-        )
-    );
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 90px);
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
 }
 
-function restartGame() {
-    currentPlayer = "X";
-    gameActive = true;
-    statusText.textContent = "Player X's turn";
-    createBoard();
+.cell {
+    width: 90px;
+    height: 90px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: 0.2s ease;
 }
 
-restartButton.addEventListener("click", restartGame);
+.cell:hover {
+    transform: scale(1.05);
+    background: rgba(255,255,255,0.2);
+}
 
-createBoard();
+button {
+    padding: 8px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #00c6ff;
+    color: black;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    font-size: 1.2rem;
+}
