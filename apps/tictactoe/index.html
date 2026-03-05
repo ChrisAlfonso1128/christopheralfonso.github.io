@@ -68,6 +68,16 @@ button {
     background: #00ffcc !important;
     color: black;
 }
+    .back {
+    display: inline-block;
+    padding: 10px 18px;
+    margin-top: 10px;
+    border-radius: 10px;
+    background: #00c6ff;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
 </style>
 </head>
 
@@ -81,8 +91,8 @@ button {
         <button onclick="startGame(false)">Player vs Player</button>
         <button onclick="startGame(true)">Play vs Computer</button>
         <br><br>
-        <a class="back" href="../../index.html">← Back to Portfolio</a>
-        </button>
+       <a class="back" href="../../index.html">← Back to Portfolio</a>
+        
     </div>
 
     <div id="gameScreen" class="hidden">
@@ -94,9 +104,9 @@ button {
         <div class="board" id="board"></div>
         <div id="status"></div>
 
-        <button onclick="backToMenu()">Change Mode</button>
-          <a href="christopheralfonso.github.io/index.html">⬅ Back to Portfolio</a>
-        </button>
+<button onclick="backToMenu()">Change Mode</button>
+<br><br>
+<a class="back" href="../../index.html">⬅ Back to Portfolio</a>
     </div>
 
 </div>
