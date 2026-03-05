@@ -1,10 +1,258 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tic Tac Toe</title>
+<meta charset="UTF-8">
+<title>Tic Tac Toe | Christopher Alfonso</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
+    text-align: center;
+}
+
+.container {
+    margin-top: 60px;
+}
+
+.hidden {
+    display: none;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 10px;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.cell:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+button {
+    padding: 10px 18px;
+    margin: 8px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #00c6ff;
+    color: black;
+    font-weight: bold;
+}
+
+.scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 10px;
+}
+
+.winner {
+    background: #00ffcc !important;
+    color: black;
+}
+</style>
 </head>
+
 <body>
-  <h1>Tic Tac Toe Game</h1>
-  <a href="../../index.html">⬅ Back to Portfolio</a>
+
+<div class="container">
+
+    <div id="modeScreen">
+        <h1>Tic Tac Toe</h1>
+        <p>Select Game Mode</p>
+        <button onclick="startGame(false)">Player vs Player</button>
+        <button onclick="startGame(true)">Play vs Computer</button>
+        <br><br>
+        <button onclick="window.location.href='index.html'">
+            ← Back to Portfolio
+        </button>
+    </div>
+
+    <div id="gameScreen" class="hidden">
+        <div class="scoreboard">
+            <span>X: <span id="scoreX">0</span></span>
+            <span>O: <span id="scoreO">0</span></span>
+        </div>
+
+        <div class="board" id="board"></div>
+        <div id="status"></div>
+
+        <button onclick="backToMenu()">Change Mode</button>
+        <button onclick="window.location.href='index.html'">
+            ← Back to Portfolio
+        </button>
+    </div>
+
+</div>
+
+<script>
+let board = [];
+let currentPlayer = "X";
+let vsAI = false;
+let scoreX = 0;
+let scoreO = 0;
+let gameActive = true;
+
+const winPatterns = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function startGame(aiMode) {
+    vsAI = aiMode;
+    document.getElementById("modeScreen").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
+    resetBoard();
+}
+
+function backToMenu() {
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("modeScreen").classList.remove("hidden");
+}
+
+function resetBoard() {
+    board = Array(9).fill("");
+    currentPlayer = "X";
+    gameActive = true;
+    const boardDiv = document.getElementById("board");
+    boardDiv.innerHTML = "";
+
+    board.forEach((_, index) => {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = index;
+        cell.addEventListener("click", handleMove);
+        boardDiv.appendChild(cell);
+    });
+
+    document.getElementById("status").textContent = "Player X's turn";
+}
+
+function handleMove(e) {
+    const index = e.target.dataset.index;
+
+    if (board[index] !== "" || !gameActive) return;
+
+    makeMove(index, currentPlayer);
+
+    if (checkWinner(board)) return endGame(currentPlayer);
+
+    if (!board.includes("")) return endGame(null);
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    document.getElementById("status").textContent = `Player ${currentPlayer}'s turn`;
+
+    if (vsAI && currentPlayer === "O") {
+        setTimeout(aiMove, 400);
+    }
+}
+
+function makeMove(index, player) {
+    board[index] = player;
+    document.querySelectorAll(".cell")[index].textContent = player;
+}
+
+function checkWinner(b) {
+    return winPatterns.some(pattern => {
+        return pattern.every(i => b[i] === currentPlayer);
+    });
+}
+
+function endGame(winner) {
+    gameActive = false;
+
+    if (winner) {
+        document.getElementById("status").textContent = `Player ${winner} wins!`;
+        if (winner === "X") scoreX++;
+        else scoreO++;
+    } else {
+        document.getElementById("status").textContent = "It's a draw!";
+    }
+
+    document.getElementById("scoreX").textContent = scoreX;
+    document.getElementById("scoreO").textContent = scoreO;
+
+    setTimeout(resetBoard, 1500);
+}
+
+function aiMove() {
+    let bestScore = -Infinity;
+    let move;
+
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+            board[i] = "O";
+            let score = minimax(board, 0, false);
+            board[i] = "";
+            if (score > bestScore) {
+                bestScore = score;
+                move = i;
+            }
+        }
+    }
+
+    makeMove(move, "O");
+
+    if (checkWinner(board)) return endGame("O");
+    if (!board.includes("")) return endGame(null);
+
+    currentPlayer = "X";
+    document.getElementById("status").textContent = "Player X's turn";
+}
+
+function minimax(newBoard, depth, isMaximizing) {
+    if (checkStaticWinner(newBoard, "O")) return 10 - depth;
+    if (checkStaticWinner(newBoard, "X")) return depth - 10;
+    if (!newBoard.includes("")) return 0;
+
+    if (isMaximizing) {
+        let best = -Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (newBoard[i] === "") {
+                newBoard[i] = "O";
+                best = Math.max(best, minimax(newBoard, depth+1, false));
+                newBoard[i] = "";
+            }
+        }
+        return best;
+    } else {
+        let best = Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (newBoard[i] === "") {
+                newBoard[i] = "X";
+                best = Math.min(best, minimax(newBoard, depth+1, true));
+                newBoard[i] = "";
+            }
+        }
+        return best;
+    }
+}
+
+function checkStaticWinner(b, player) {
+    return winPatterns.some(pattern => {
+        return pattern.every(i => b[i] === player);
+    });
+}
+</script>
+
 </body>
 </html>
