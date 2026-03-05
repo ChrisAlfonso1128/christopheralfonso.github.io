@@ -1,50 +1,44 @@
 body{
-font-family: Arial, sans-serif;
-background: linear-gradient(135deg,#0f172a,#020617);
+font-family: Arial;
+background: linear-gradient(135deg,#020617,#0f172a);
 color:white;
 display:flex;
 justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
+padding:40px;
 }
 
-.container{
-background:#111827;
-padding:40px;
-border-radius:12px;
-width:350px;
-box-shadow:0 0 20px rgba(0,0,0,0.5);
+.app{
+width:420px;
+backdrop-filter: blur(20px);
+background: rgba(255,255,255,0.05);
+border-radius:15px;
+padding:30px;
+box-shadow:0 0 40px rgba(0,0,0,0.6);
 }
 
 h1{
 text-align:center;
-margin-bottom:20px;
+margin-bottom:25px;
 }
 
-label{
-display:block;
-margin-top:10px;
-}
-
-input,select{
+.form input,
+.form select{
 width:100%;
-padding:8px;
-margin-top:5px;
+padding:10px;
+margin:8px 0;
+border-radius:8px;
 border:none;
-border-radius:6px;
-background:#1f2937;
+background:#111827;
 color:white;
 }
 
 button{
-margin-top:20px;
 width:100%;
-padding:10px;
+padding:12px;
+margin-top:10px;
 background:#3b82f6;
 border:none;
-border-radius:8px;
-color:white;
+border-radius:10px;
 font-size:16px;
 cursor:pointer;
 }
@@ -57,7 +51,11 @@ background:#2563eb;
 margin-top:20px;
 background:#020617;
 padding:15px;
-border-radius:8px;
+border-radius:10px;
+}
+
+canvas{
+margin-top:30px;
 }
 
 .back{
