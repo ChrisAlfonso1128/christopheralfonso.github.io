@@ -1,1 +1,225 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Fun Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* Base */
+  body {
+    margin: 0;
+    font-family: 'Fredoka One', cursive;
+    background: linear-gradient(120deg, #ffecd2, #fcb69f);
+    color: #333;
+    text-align: center;
+    overflow-x: hidden;
+  }
+
+  h1, h2 {
+    margin: 20px 0;
+  }
+
+  /* Landing */
+  #landing {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #startBtn {
+    margin-top: 30px;
+    padding: 20px 50px;
+    font-size: 18px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #startBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Main menu */
+  #menu {
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 50px;
+  }
+
+  .menuBtn {
+    margin: 15px;
+    padding: 20px 35px;
+    font-size: 16px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(120deg, #90f7ec, #32ccbc);
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .menuBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  /* Sections */
+  .section {
+    display: none;
+    margin: 30px auto;
+    max-width: 800px;
+    text-align: left;
+  }
+
+  /* Project & Skill Cards */
+  .project, .skill {
+    background: #fff3f0;
+    border-radius: 15px;
+    padding: 15px;
+    margin: 15px 0;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .project:hover, .skill:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  .details {
+    display: none;
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  a {
+    color: #ff6b81;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<!-- Landing -->
+<div id="landing">
+  <h1>Welcome! 🎉</h1>
+  <p>Explore my work and play a little while you’re at it!</p>
+  <button id="startBtn">START</button>
+</div>
+
+<!-- Main Menu -->
+<div id="menu">
+  <button class="menuBtn" data-section="projects">PROJECTS</button>
+  <button class="menuBtn" data-section="skills">SKILLS</button>
+  <button class="menuBtn" data-section="resume">RESUME</button>
+  <button class="menuBtn" data-section="contact">CONTACT</button>
+</div>
+
+<!-- Projects Section -->
+<div id="projects" class="section">
+  <h2>Projects 🎮</h2>
+  <div class="project">
+    Tic-Tac-Toe
+    <div class="details">
+      Simple JS Tic-Tac-Toe game.<br>
+      Tech: HTML, CSS, JS<br>
+      <a href="#">View on GitHub</a>
+    </div>
+  </div>
+  <div class="project">
+    Minecraft Mod Assets
+    <div class="details">
+      Interactive preview of mod assets.<br>
+      Tech: HTML, CSS, JS<br>
+      <a href="#">View on GitHub</a>
+    </div>
+  </div>
+</div>
+
+<!-- Skills Section -->
+<div id="skills" class="section">
+  <h2>Skills 🌟</h2>
+  <div class="skill">
+    JavaScript
+    <div class="details">Experience building interactive web apps, mini-games, and tools.</div>
+  </div>
+  <div class="skill">
+    Python
+    <div class="details">Scripts, automation, and data projects.</div>
+  </div>
+  <div class="skill">
+    Git & GitHub
+    <div class="details">Version control and collaboration.</div>
+  </div>
+</div>
+
+<!-- Resume Section -->
+<div id="resume" class="section">
+  <h2>Resume 📄</h2>
+  <p>Education: Florida International University</p>
+  <p>Work Experience: Web Developer Intern</p>
+  <p>Certifications: None yet</p>
+</div>
+
+<!-- Contact Section -->
+<div id="contact" class="section">
+  <h2>Contact ✉️</h2>
+  <p>Email: chrisalfonso1238@gmail.com</p>
+  <p>GitHub: <a href="#">github.com/yourusername</a></p>
+</div>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const landing = document.getElementById('landing');
+  const menu = document.getElementById('menu');
+  const sections = document.querySelectorAll('.section');
+  const menuBtns = document.querySelectorAll('.menuBtn');
+  const projects = document.querySelectorAll('.project');
+  const skills = document.querySelectorAll('.skill');
+
+  // Start button
+  startBtn.addEventListener('click', () => {
+    landing.style.display = 'none';
+    menu.style.display = 'flex';
+  });
+
+  // Menu buttons
+  menuBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sections.forEach(s => s.style.display = 'none');
+      const section = document.getElementById(btn.dataset.section);
+      section.style.display = 'block';
+    });
+  });
+
+  // Toggle project/skill details
+  projects.forEach(p => {
+    p.addEventListener('click', () => {
+      const details = p.querySelector('.details');
+      details.style.display = details.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  skills.forEach(s => {
+    s.addEventListener('click', () => {
+      const details = s.querySelector('.details');
+      details.style.display = details.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+</script>
+</body>
+</html>
