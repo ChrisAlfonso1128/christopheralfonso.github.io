@@ -28,7 +28,8 @@ margin-bottom:10px;
 canvas{
 background:#020617;
 border:2px solid #1e293b;
-box-shadow:0 0 30px rgba(56,189,248,.3);
+box-shadow:0 0 25px rgba(56,189,248,.3);
+display:none;
 }
 
 .ui{
@@ -36,19 +37,12 @@ margin-top:10px;
 display:flex;
 gap:20px;
 font-size:18px;
+display:none;
 }
 
-.back{
-margin-top:15px;
-color:#38bdf8;
-text-decoration:none;
-}
+/* MENU SCREENS */
 
-.back:hover{
-color:#7dd3fc;
-}
-
-.overlay{
+.menu{
 position:absolute;
 top:0;
 left:0;
@@ -58,19 +52,24 @@ display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
-background:rgba(2,6,23,.8);
-font-size:30px;
-display:none;
+background:#020617;
 }
 
-button{
-margin-top:20px;
-padding:12px 25px;
+.menu h2{
+margin-bottom:20px;
+}
+
+.menu button{
+margin:10px;
+padding:12px 30px;
+font-size:18px;
 border:none;
 background:#38bdf8;
-color:black;
-font-weight:bold;
 cursor:pointer;
+}
+
+.menu button:hover{
+background:#7dd3fc;
 }
 
 </style>
@@ -80,6 +79,20 @@ cursor:pointer;
 
 <h1>Neon Snake</h1>
 
+<!-- MAIN MENU -->
+<div class="menu" id="mainMenu">
+<h2>Snake</h2>
+<button onclick="startGame()">Start Game</button>
+<button onclick="goPortfolio()">Back to Portfolio</button>
+</div>
+
+<!-- GAME OVER MENU -->
+<div class="menu" id="gameOverMenu" style="display:none;">
+<h2>Game Over</h2>
+<button onclick="restart()">Play Again</button>
+<button onclick="goPortfolio()">Back to Portfolio</button>
+</div>
+
 <canvas id="game" width="500" height="500"></canvas>
 
 <div class="ui">
@@ -87,30 +100,44 @@ cursor:pointer;
 <div>High Score: <span id="highscore">0</span></div>
 </div>
 
-<a class="back" href="../../index.html">← Back to Portfolio</a>
-
-<div class="overlay" id="gameOver">
-Game Over
-<button onclick="restart()">Play Again</button>
-</div>
-
 <script>
 
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
+const mainMenu = document.getElementById("mainMenu")
+const gameOverMenu = document.getElementById("gameOverMenu")
+const ui = document.querySelector(".ui")
+
 const grid = 25
 
 let snake
 let food
-let particles=[]
 let score=0
 let speed=120
 let lastTime=0
-let paused=false
+let running=false
 
 let highscore = localStorage.getItem("snakeHigh") || 0
 document.getElementById("highscore").innerText = highscore
+
+function randomPos(){
+return Math.floor(Math.random()*20)*grid
+}
+
+function startGame(){
+
+mainMenu.style.display="none"
+canvas.style.display="block"
+ui.style.display="flex"
+
+init()
+
+running=true
+
+requestAnimationFrame(update)
+
+}
 
 function init(){
 
@@ -128,37 +155,18 @@ x:randomPos(),
 y:randomPos()
 }
 
-particles=[]
 score=0
 speed=120
+
 document.getElementById("score").innerText=0
-document.getElementById("gameOver").style.display="none"
-
-}
-
-function randomPos(){
-return Math.floor(Math.random()*20)*grid
-}
-
-function spawnParticles(x,y){
-
-for(let i=0;i<10;i++){
-particles.push({
-x:x,
-y:y,
-dx:(Math.random()-0.5)*4,
-dy:(Math.random()-0.5)*4,
-life:30
-})
-}
 
 }
 
 function update(time){
 
-requestAnimationFrame(update)
+if(!running) return
 
-if(paused) return
+requestAnimationFrame(update)
 
 if(time-lastTime < speed) return
 
@@ -195,8 +203,6 @@ speed *= .95
 
 document.getElementById("score").innerText=score
 
-spawnParticles(food.x,food.y)
-
 food.x=randomPos()
 food.y=randomPos()
 
@@ -215,30 +221,18 @@ gameOver()
 ctx.shadowBlur=0
 
 ctx.fillStyle="#ef4444"
-ctx.beginPath()
-ctx.arc(food.x+grid/2,food.y+grid/2,grid/2.5,0,Math.PI*2)
-ctx.fill()
-
-particles.forEach((p,i)=>{
-
-p.x+=p.dx
-p.y+=p.dy
-p.life--
-
-ctx.fillStyle="orange"
-ctx.fillRect(p.x,p.y,3,3)
-
-if(p.life<=0){
-particles.splice(i,1)
-}
-
-})
+ctx.fillRect(food.x,food.y,grid-2,grid-2)
 
 }
 
 function gameOver(){
 
-document.getElementById("gameOver").style.display="flex"
+running=false
+
+canvas.style.display="none"
+ui.style.display="none"
+
+gameOverMenu.style.display="flex"
 
 if(score > highscore){
 highscore = score
@@ -249,14 +243,27 @@ document.getElementById("highscore").innerText = score
 }
 
 function restart(){
+
+gameOverMenu.style.display="none"
+
+canvas.style.display="block"
+ui.style.display="flex"
+
 init()
+
+running=true
+
+requestAnimationFrame(update)
+
+}
+
+function goPortfolio(){
+window.location.href="../../index.html"
 }
 
 document.addEventListener("keydown",e=>{
 
-if(e.key==="p"){
-paused=!paused
-}
+if(!running) return
 
 if(e.key==="ArrowLeft" && snake.dx===0){
 snake.dx=-grid
@@ -279,9 +286,6 @@ snake.dx=0
 }
 
 })
-
-init()
-requestAnimationFrame(update)
 
 </script>
 
