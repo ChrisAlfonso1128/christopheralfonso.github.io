@@ -203,3 +203,55 @@ text-decoration:none;
 .download-btn:hover{
 background:#818cf8;
 }
+.card-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:30px;
+margin-top:40px;
+}
+
+/* Flip card */
+
+.flip-card{
+height:220px;
+perspective:1000px;
+}
+
+.flip-inner{
+position:relative;
+width:100%;
+height:100%;
+transition:transform .7s;
+transform-style:preserve-3d;
+}
+
+.flip-card:hover .flip-inner{
+transform:rotateY(180deg);
+}
+
+.flip-front,
+.flip-back{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+border-radius:12px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+padding:20px;
+background:#1e293b;
+border:1px solid #334155;
+text-align:center;
+}
+
+.flip-front{
+font-size:1.2rem;
+font-weight:600;
+}
+
+.flip-back{
+transform:rotateY(180deg);
+font-size:.9rem;
+}
