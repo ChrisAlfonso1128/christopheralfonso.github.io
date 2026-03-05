@@ -3,37 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calorie & Macro Calculator</title>
+<title>Fitness Macro Calculator</title>
+
 <link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-<h1>Calorie & Macro Calculator</h1>
+<h1>Fitness Macro Calculator</h1>
 
 <div class="form">
 
-<label>Age</label>
-<input type="number" id="age">
+<input type="number" id="age" placeholder="Age">
 
-<label>Gender</label>
 <select id="gender">
 <option value="male">Male</option>
 <option value="female">Female</option>
 </select>
 
-<label>Height (cm)</label>
-<input type="number" id="height">
+<input type="number" id="height" placeholder="Height (cm)">
 
-<label>Current Weight (lbs)</label>
-<input type="number" id="weight">
+<input type="number" id="weight" placeholder="Current Weight (lbs)">
 
-<label>Goal Weight (lbs)</label>
-<input type="number" id="goalWeight">
+<input type="number" id="goalWeight" placeholder="Goal Weight (lbs)">
 
-<label>Activity Level</label>
 <select id="activity">
 <option value="1.2">No Exercise</option>
 <option value="1.375">Light Exercise</option>
@@ -41,16 +39,19 @@
 <option value="1.725">Heavy Exercise</option>
 </select>
 
-<button onclick="calculate()">Calculate</button>
+<button onclick="calculate()">Calculate Plan</button>
 
 </div>
 
-<div id="results" class="results"></div>
+<div class="results" id="results"></div>
 
-<a href="../index.html" class="back">⬅ Back to Portfolio</a>
+<canvas id="weightChart"></canvas>
+
+<a class="back" href="../index.html">⬅ Back to Portfolio</a>
 
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
