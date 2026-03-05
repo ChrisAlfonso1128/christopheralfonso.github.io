@@ -1,10 +1,289 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Snake Game</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Snake</title>
+
+<style>
+
+body{
+margin:0;
+background:#020617;
+font-family:Arial, sans-serif;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+overflow:hidden;
+}
+
+h1{
+color:#38bdf8;
+margin-bottom:10px;
+}
+
+canvas{
+background:#020617;
+border:2px solid #1e293b;
+box-shadow:0 0 30px rgba(56,189,248,.3);
+}
+
+.ui{
+margin-top:10px;
+display:flex;
+gap:20px;
+font-size:18px;
+}
+
+.back{
+margin-top:15px;
+color:#38bdf8;
+text-decoration:none;
+}
+
+.back:hover{
+color:#7dd3fc;
+}
+
+.overlay{
+position:absolute;
+top:0;
+left:0;
+right:0;
+bottom:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+background:rgba(2,6,23,.8);
+font-size:30px;
+display:none;
+}
+
+button{
+margin-top:20px;
+padding:12px 25px;
+border:none;
+background:#38bdf8;
+color:black;
+font-weight:bold;
+cursor:pointer;
+}
+
+</style>
 </head>
+
 <body>
-  <h1>Snake Game</h1>
-  <a href="../../index.html">⬅ Back to Portfolio</a>
+
+<h1>Neon Snake</h1>
+
+<canvas id="game" width="500" height="500"></canvas>
+
+<div class="ui">
+<div>Score: <span id="score">0</span></div>
+<div>High Score: <span id="highscore">0</span></div>
+</div>
+
+<a class="back" href="../../index.html">← Back to Portfolio</a>
+
+<div class="overlay" id="gameOver">
+Game Over
+<button onclick="restart()">Play Again</button>
+</div>
+
+<script>
+
+const canvas = document.getElementById("game")
+const ctx = canvas.getContext("2d")
+
+const grid = 25
+
+let snake
+let food
+let particles=[]
+let score=0
+let speed=120
+let lastTime=0
+let paused=false
+
+let highscore = localStorage.getItem("snakeHigh") || 0
+document.getElementById("highscore").innerText = highscore
+
+function init(){
+
+snake={
+x:250,
+y:250,
+dx:grid,
+dy:0,
+cells:[],
+max:4
+}
+
+food={
+x:randomPos(),
+y:randomPos()
+}
+
+particles=[]
+score=0
+speed=120
+document.getElementById("score").innerText=0
+document.getElementById("gameOver").style.display="none"
+
+}
+
+function randomPos(){
+return Math.floor(Math.random()*20)*grid
+}
+
+function spawnParticles(x,y){
+
+for(let i=0;i<10;i++){
+particles.push({
+x:x,
+y:y,
+dx:(Math.random()-0.5)*4,
+dy:(Math.random()-0.5)*4,
+life:30
+})
+}
+
+}
+
+function update(time){
+
+requestAnimationFrame(update)
+
+if(paused) return
+
+if(time-lastTime < speed) return
+
+lastTime=time
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+snake.x += snake.dx
+snake.y += snake.dy
+
+if(snake.x < 0 || snake.y < 0 || snake.x >= canvas.width || snake.y >= canvas.height){
+gameOver()
+return
+}
+
+snake.cells.unshift({x:snake.x,y:snake.y})
+
+if(snake.cells.length > snake.max){
+snake.cells.pop()
+}
+
+snake.cells.forEach((cell,index)=>{
+
+ctx.fillStyle="#22c55e"
+ctx.shadowBlur=20
+ctx.shadowColor="#22c55e"
+ctx.fillRect(cell.x,cell.y,grid-2,grid-2)
+
+if(cell.x===food.x && cell.y===food.y){
+
+snake.max++
+score++
+speed *= .95
+
+document.getElementById("score").innerText=score
+
+spawnParticles(food.x,food.y)
+
+food.x=randomPos()
+food.y=randomPos()
+
+}
+
+for(let i=index+1;i<snake.cells.length;i++){
+
+if(cell.x===snake.cells[i].x && cell.y===snake.cells[i].y){
+gameOver()
+}
+
+}
+
+})
+
+ctx.shadowBlur=0
+
+ctx.fillStyle="#ef4444"
+ctx.beginPath()
+ctx.arc(food.x+grid/2,food.y+grid/2,grid/2.5,0,Math.PI*2)
+ctx.fill()
+
+particles.forEach((p,i)=>{
+
+p.x+=p.dx
+p.y+=p.dy
+p.life--
+
+ctx.fillStyle="orange"
+ctx.fillRect(p.x,p.y,3,3)
+
+if(p.life<=0){
+particles.splice(i,1)
+}
+
+})
+
+}
+
+function gameOver(){
+
+document.getElementById("gameOver").style.display="flex"
+
+if(score > highscore){
+highscore = score
+localStorage.setItem("snakeHigh",score)
+document.getElementById("highscore").innerText = score
+}
+
+}
+
+function restart(){
+init()
+}
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="p"){
+paused=!paused
+}
+
+if(e.key==="ArrowLeft" && snake.dx===0){
+snake.dx=-grid
+snake.dy=0
+}
+
+else if(e.key==="ArrowRight" && snake.dx===0){
+snake.dx=grid
+snake.dy=0
+}
+
+else if(e.key==="ArrowUp" && snake.dy===0){
+snake.dy=-grid
+snake.dx=0
+}
+
+else if(e.key==="ArrowDown" && snake.dy===0){
+snake.dy=grid
+snake.dx=0
+}
+
+})
+
+init()
+requestAnimationFrame(update)
+
+</script>
+
 </body>
 </html>
